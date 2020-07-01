@@ -8,7 +8,7 @@ pillow
 tensorboard
 PyYAML>=5.3
 torchvision
-scipy
+scipy==1.4.1
 tqdm
 git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI
 

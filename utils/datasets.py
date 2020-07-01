@@ -61,6 +61,40 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
     return dataloader, dataset
 
 
+class LoadInMemoryImage:  # for inference
+    def __init__(self, image, img_size=416):
+        self.img_size = img_size
+        self.nF = 1
+        self.image = image
+
+    def __iter__(self):
+        self.count = 0
+        return self
+
+    def __next__(self):
+        if self.count == self.nF:
+            raise StopIteration
+        
+        # Read image
+        self.count += 1
+        img0 = self.image # cv2.imread(path)  # BGR
+        assert img0 is not None, 'Image Invalid'
+        print('image %g/%g: ' % (self.count, self.nF), end='')
+
+        # Padded resize
+        img = letterbox(img0, new_shape=self.img_size)[0]
+
+        # Convert
+        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+        img = np.ascontiguousarray(img)
+
+        # cv2.imwrite(path + '.letterbox.jpg', 255 * img.transpose((1, 2, 0))[:, :, ::-1])  # save letterbox image
+        return img, img0
+
+    def __len__(self):
+        return self.nF  # number of files
+
+
 class LoadImages:  # for inference
     def __init__(self, path, img_size=640):
         path = str(Path(path))  # os-agnostic
